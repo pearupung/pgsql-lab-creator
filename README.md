@@ -61,9 +61,6 @@ The lab master is the one that sets up the infrastructure and quides people thro
 ```mermaid
 graph LR;
   %% Services to set up
-  ldap[LDAP server]
-  pgsql[Postgres]
-  exporter[SQLExporter]
   grafana[Grafana]
   server[Python Flask server]
   
@@ -78,10 +75,6 @@ graph LR;
 
   %% Infrastructure configuration
   lab-master-- 2. enters information about the database and lab participants -->server
-  server-- makes a query file and forwards it -->exporter
-  server-- configures LDAP accounts -->ldap
-  server-- configures panel variables and setup -->grafana
-  server-- creates databases and grants access for the users -->pgsql
 
   lab-master-- 4. looks at dashboard to see how people are progressing -->grafana
   lab-master-- 3. sees initial database passwords on screen and forwards them to students-->server
