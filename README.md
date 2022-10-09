@@ -12,7 +12,7 @@ The live demo will be hosted as soon as I have made enough progress on it.
 Overall, this is an architecture I have in mind:
 
 ```mermaid
-graph LR;
+graph TD;
   %% Services to set up
   ldap[LDAP server]
   pgsql[Postgres]
@@ -20,7 +20,7 @@ graph LR;
   prometheus[Prometheus instance]
   grafana[Grafana]
   server[Python Flask server]
-  caddy[Caddy reverse proxy]
+  sampledb[External Sample Database]
   
   %% The docker instance that runs services
   docker[Docker instance]
@@ -34,6 +34,7 @@ graph LR;
 
   %% Infrastructure configuration
   lab-master-- enters information about the database and lab participants -->server
+  server-- query sample database contents -optional- --> sampledb
   server-- makes a query file and forwards it -->exporter
   server-- configures LDAP accounts -->ldap
   server-- configures panel variables and setup -->grafana
@@ -46,6 +47,7 @@ graph LR;
   pgsql-- authenticates against LDAP provider-->ldap
   lab-student-- starts lab-->pgsql
   lab-master-- looks at dashboard to see how people are progressing -->grafana
+  grafana-- authenticates against LDAP provider -optional- -->ldap
   lab-student-- looks at dashboard to see if anybody needs help -->grafana
 
   %% Infrastructure interaction
@@ -106,4 +108,48 @@ graph LR;
   pgsql-- authenticates against LDAP provider-->ldap
   lab-student-- starts lab-->pgsql
   lab-student-- looks at dashboard to see if anybody needs help -->grafana
+```
+
+### Server interaction view
+
+```mermaid
+graph LR;
+  %% Services to set up
+  ldap[LDAP server]
+  pgsql[Postgres]
+  exporter[SQLExporter]
+  grafana[Grafana]
+  server[Python Flask server]
+  sampledb[External Sample Database]
+
+
+  %% Infrastructure configuration
+  server-- query sample database contents -optional- -->sampledb
+  server-- makes a query file and forwards it -->exporter
+  server-- configures LDAP accounts -->ldap
+  server-- configures panel variables and setup -->grafana
+  server-- creates databases and grants access for the users -->pgsql
+```
+
+### Polling & authentication view
+
+This view gathers all Grafana etc. related interfacings.
+
+```mermaid
+graph TD;
+  %% Services to set up
+  ldap[LDAP server]
+  pgsql[Postgres]
+  exporter[SQLExporter]
+  prometheus[Prometheus instance]
+  grafana[Grafana]
+
+  %% Lab interaction
+  pgsql-- authenticates against LDAP provider-->ldap
+  grafana-- authenticates against LDAP provider -optional- -->ldap
+
+  %% Infrastructure interaction
+  grafana-- poll Prometheus for data to put on screen -->prometheus
+  prometheus-- poll SQL Exporter -->exporter
+  exporter-- poll Postgres instance -->pgsql
 ```
