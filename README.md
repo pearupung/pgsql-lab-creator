@@ -6,3 +6,83 @@ At university I often times sat in a lab behind a computer with no feeling of or
 2. sets up automatic monitoring based on some example database and gives feedback on how well the students are progressing
 
 The live demo will be hosted as soon as I have made enough progress on it.
+
+## Architecture
+
+Overall, this is an architecture I have in mind:
+
+```mermaid
+graph LR;
+  %% Services to set up
+  ldap[LDAP server]
+  pgsql[Postgres]
+  exporter[SQLExporter]
+  prometheus[Prometheus instance]
+  grafana[Grafana]
+  server[Python Flask server]
+  caddy[Caddy reverse proxy]
+  
+  %% The docker instance that runs services
+  docker[Docker instance]
+
+  %% Participants 
+  lab-master[Lab Master]
+  lab-student[Lab Student]
+
+  %% Infrastructure setup
+  lab-master-- executes docker compose -->docker
+
+  %% Infrastructure configuration
+  lab-master-- enters information about the database and lab participants -->server
+  server-- makes a query file and forwards it -->exporter
+  server-- configures LDAP accounts -->ldap
+  server-- configures panel variables and setup -->grafana
+  server-- creates databases and grants access for the users -->pgsql
+  lab-student-- sees initial database passwords on screen -->server
+
+  %% Lab interaction
+  lab-student-- changes LDAP password -->ldap
+  lab-student-- logs in to psql instance-->pgsql
+  pgsql-- authenticates against LDAP provider-->ldap
+  lab-student-- starts lab-->pgsql
+  lab-master-- looks at dashboard to see how people are progressing -->grafana
+  lab-student-- looks at dashboard to see if anybody needs help -->grafana
+
+  %% Infrastructure interaction
+  grafana-- poll Prometheus for data to put on screen -->prometheus
+  prometheus-- poll SQL Exporter -->exporter
+  exporter-- poll Postgres instance -->pgsql
+```
+
+### Lab master view
+
+The lab master is the one that sets up the infrastructure and quides people through the lab. His overall activities are infrastructure setup and configuration. His responsibilities end when the participant can access the database and then he can relax and watch the monitoring to see how everybody progresses. The procedure looks like this:
+
+```mermaid
+graph LR;
+  %% Services to set up
+  ldap[LDAP server]
+  pgsql[Postgres]
+  exporter[SQLExporter]
+  grafana[Grafana]
+  server[Python Flask server]
+  
+  %% The docker instance that runs services
+  docker[Docker instance]
+
+  %% Participants 
+  lab-master[Lab Master]
+
+  %% Infrastructure setup
+  lab-master-- 1. executes docker compose -->docker
+
+  %% Infrastructure configuration
+  lab-master-- 2. enters information about the database and lab participants -->server
+  server-- makes a query file and forwards it -->exporter
+  server-- configures LDAP accounts -->ldap
+  server-- configures panel variables and setup -->grafana
+  server-- creates databases and grants access for the users -->pgsql
+
+  lab-master-- 4. looks at dashboard to see how people are progressing -->grafana
+  lab-master-- 3. sees initial database passwords on screen and forwards them to students-->server
+```
