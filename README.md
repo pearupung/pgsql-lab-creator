@@ -112,6 +112,8 @@ graph LR;
 
 ### Server interaction view
 
+I have been asking myself for a long time right now if I indeed need an HTTP server for easier provisioning. I decided yes because I know some Python and taking on a new technology seemed over my head. Maybe there is an infrastructure as code approach *a la* Ansible, Chef, Puppet, K3S or some stuff like that, but a one-in-all   solution is a pickle to find and furthermore - trust. Remember - that solution would have to create configuration files from parsed sql dumps - I am sure that Ansible could do it somehow someway with templating and for loops, but truth be told - I think Python and pandas manipulate YAML better than scripts.
+
 ```mermaid
 graph LR;
   %% Services to set up
