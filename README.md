@@ -153,3 +153,13 @@ graph TD;
   prometheus-- poll SQL Exporter -->exporter
   exporter-- poll Postgres instance -->pgsql
 ```
+
+## Opinionated answers to some features
+
+1. How does this export lab results to another service? 
+
+*It doesn't*. Having a monitoring service gives you all the power to export data the way you like it. Most grading / curriculum management software allows imports from CSV files, manual input, API-s etc. Considering that you can pick up data from monitoring data or the database itself, one can simply export a prometheus query or database state and do some scripting from there. 
+
+2. Where can I set this up?
+
+Purely up to you. There is a live demo with installation guides coming soon.
