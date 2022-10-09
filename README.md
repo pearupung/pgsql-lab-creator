@@ -86,3 +86,31 @@ graph LR;
   lab-master-- 4. looks at dashboard to see how people are progressing -->grafana
   lab-master-- 3. sees initial database passwords on screen and forwards them to students-->server
 ```
+
+### Lab student view
+
+The lab student must simply log in to the database and begin work. The student can see his progress on the monitoring screen as well as his peers' progress. Depending on the LDAP solution students can get an initial password and change it or use their university authentication source.
+
+```mermaid
+graph LR;
+  %% Services to set up
+  ldap[LDAP server]
+  pgsql[Postgres]
+  grafana[Grafana]
+  server[Python Flask server]
+
+  %% Participants 
+  lab-student[Lab Student]
+
+  %% Infrastructure setup
+
+  %% Infrastructure configuration
+  lab-student-- sees initial database passwords on screen -->server
+
+  %% Lab interaction
+  lab-student-- changes LDAP password -->ldap
+  lab-student-- logs in to psql instance-->pgsql
+  pgsql-- authenticates against LDAP provider-->ldap
+  lab-student-- starts lab-->pgsql
+  lab-student-- looks at dashboard to see if anybody needs help -->grafana
+```
